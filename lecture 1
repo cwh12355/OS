@@ -1,0 +1,98 @@
+### 操作系统的具体目标是：
+1.理解操作系统的设计和实现，设计指的是整体的结构，实现指的是具体的代码长得什么样，
+### 1.对于一些低层级的一写资源进行抽象
+    2.共用一些硬件资源
+    3.隔离性
+    4.共享
+    5.权限
+    6.运行应用程序时操作系统不应该拖后腿
+    7.可以运行不同类型的应用程序
+### 计算机的系统结构可以理解为最上层的用户空间，和中间的操作系统，和最底层的硬件资源；
+KERNEL程序只有一个，他维护数据来管理用户空间的进程，同时kernel还维护了各种各样的数据结构来管理各种各样的硬件资源
+kernel内部还有大量内置的服务，kernel通常会有文件系统来实现文件系统，用来实现文件名，文件内容，以及目录等，
+并理解如何将文件如何与磁盘进行交互，所以用户程序中的文件操作实现与kernel进行交互，然后kernel在与磁盘交互；
+### kernel中的服务我们只关注文件系统，和进程管理系统，每一个用户空间程序都称为一个进程，他们有自己独立的内存以及
+使用cpu的时间。这里是由kernle进行内存的分配，
+#### 文件系统的作用是管理文件内容以及照出文件在磁盘中的位置，通常文件系统还有一个文件空间用来存放文件名，
+这个文件空间下面还有一个目录，目录可以分为绝对路径和相对路径，绝对路径是从根目录出发的目录，相对路径是从当前目录
+目录操作的目录，没一个目录都包括了一个文件，
+### kernel还要提供一些权限，来选择对于一些文件的操作
+###  应用程序与kernel交互是通过系统调用，比如现在要打开一个文件会调用一个叫fd=open（“name”，data），open调用返回
+一个文件描述符，这里的data是我们要写入的数据，fd表示这个文件已经被打开；
+当前进程的pid=write（fd，pointer，size）fd是open调用返回的文件描述符，pointer是要写入的文件的地址，size写入的字节数；
+ /*copy*/
+#include<kernel/types.h>
+#include"user/user.h"
+int main()
+{
+char buf[64];
+while(1){
+int n = read(0,buf,sizeof(buf));
+ if(n<=0)
+     break;
+     write(1,buf,n);
+  }
+  exit(0);
+  }
+  read（） 的第一个参数是文件描述符，0表示的是与console的输入，1表示的是console的输出；
+             第二个参数是指向某一段内存的地址，程序可以通过这个地址读取地址指向的数据；
+             第三个参数是读取的文件的最大字节数；
+  #### shell 可以理解为一个命令行接口，他是最早的unix接口，shell是用户程序，例如你在shell中输入ls，
+  这个命令是从运行ls文件中的指令，shell还可以进行其他的一些输出重定向，比如ls>out,就是ls命令遂产生的结果
+  重定向到out文件中；grep x < out则是将out文件中的包含x的输出；
+/*fork()*/
+int main()
+ {
+  int pid;
+  pid = fork();
+  printf("fork() returned %d\n",pid);
+  if(pid==0)
+   printf("child\n");
+   else printf("parent\n");
+   exit(0);
+   }
+  这里的exit（a），a是进程的退出状态，如果一个程序成功退出了就返回0，否则返回1；
+  /*forkexec.c*/
+  #include"user/user.h"
+  int main(){
+        int pid,status;
+        pid=fork();
+        if(pid==0){
+        char*argv[] = {"echo","THIS","IS","ECHO",0};
+        exec("eceo",argv);
+        printf("exec failed!\n");
+        exit(1);
+        }
+        else{
+        printf("parent waiting");
+       wait(&status);
+       printf("the child exited with status %d\n",status);
+       }
+       exit(0);
+    } 
+/*IO REDRIECT*/
+int main(){
+     int pid;
+     pid = fork();
+     if(pid==0){
+     close(1);
+     open("output.txt",O_wronly|O_cread);
+     char *argv={"echo","this","is","redirected",0}
+     exec("echo",argv);
+     printf("exec failed\n");
+     exit(1);
+     {
+     else exit((int*)0);
+     exit (0);
+     }
+  
+  
+             
+  
+ 
+
+
+
+
+
+    
